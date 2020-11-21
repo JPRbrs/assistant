@@ -16,6 +16,14 @@ class ShoppingList(models.Model):
     def __str__(self):
         return self.date_created.strftime("%d-%m-%y")
 
+    @classmethod
+    def get_current(cls):
+        current = cls.objects.all().filter(current=True)
+        if len(current) > 1:
+            # Raise exeception
+            print("TODO: Two current lists found, raise exception and handle")
+        return current[0]
+
 
 class Product(models.Model):
     """Product will represent a single item in the shopping_list. It'll need to be passed a

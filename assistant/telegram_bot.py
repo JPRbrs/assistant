@@ -118,13 +118,9 @@ def delete_item(update, context):
 @is_home_chat
 def add_item(update, context):
     """Add item to the shopping list"""
-    current_shopping_list = ShoppingList.objects.all().filter(current=True)
-    if len(current_shopping_list) > 1:
-        logger.error("More than one shopping list")
-    logger.info("Adding to shopping list for ", current_shopping_list)
     item_aded = update.message.text.replace("/add", "")
     item = Product(name=item_aded,
-                   shopping_list=current_shopping_list[0],
+                   shopping_list=ShoppingList.get_current(),
                    date_added=timezone.now())
     item.save()
     logger.info("item added")
