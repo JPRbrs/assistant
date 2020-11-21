@@ -24,7 +24,7 @@ except ImportError as exc:
         "forget to activate a virtual environment?"
     ) from exc
 
-from shoppinglist.models import Product
+from shoppinglist.models import Product, ShoppingList
 from django.utils import timezone
 import pathlib
 import logging
@@ -41,6 +41,17 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+
+
+def is_home_chat(func):
+    """Checks the message comes from our home's chat"""
+    @functools.wraps(func)
+    def wrapper_decorator(*args, **kwargs):
+        if args[0].effective_chat.id != CHAT_ID:
+            logger.info("Message from another chat: ")
+            return None
+        return func(*args, **kwargs)
+    return wrapper_decorator
 
 
 # Define a few command handlers. These usually take the two arguments update and
@@ -104,25 +115,19 @@ def delete_item(update, context):
     # update.message.reply_text("item deleted", quote=False)
 
 
-def is_home_chat(func):
-    """Checks the message comes from our home's chat"""
-    @functools.wraps(func)
-    def wrapper_decorator(*args, **kwargs):
-        if args[0].effective_chat.id != CHAT_ID:
-            logger.info("Message from another chat: ")
-            return None
-        else:
-            return func(*args, **kwargs)
-    return wrapper_decorator
-
-
 @is_home_chat
 def add_item(update, context):
     """Add item to the shopping list"""
+    current_shopping_list = ShoppingList.objects.all().filter(current=True)
+    if len(current_shopping_list) > 1:
+        logger.error("More than one shopping list")
+    logger.info("Adding to shopping list for ", current_shopping_list)
     item_aded = update.message.text.replace("/add", "")
-    with open(SHOPPING_LIST, "a") as f:
-        print(item_aded, file=f, flush=True)
-        logger.info("item added")
+    item = Product(name=item_aded,
+                   shopping_list=current_shopping_list[0],
+                   date_added=timezone.now())
+    item.save()
+    logger.info("item added")
 
 @is_home_chat
 def get_list(update, context):
