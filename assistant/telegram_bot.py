@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 """
 Simple Bot to reply to Telegram messages.
 First, a few handler functions are defined. Then, those functions are passed to
@@ -16,15 +17,6 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "assistant.settings")
 
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
-try:
-    from django.core.management import execute_from_command_line
-except ImportError as exc:
-    raise ImportError(
-        "Couldn't import Django. Are you sure it's installed and "
-        "available on your PYTHONPATH environment variable? Did you "
-        "forget to activate a virtual environment?"
-    ) from exc
-from django.utils import timezone
 from telegram_secrets import TOKEN, CHAT_ID
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
@@ -73,7 +65,8 @@ def button(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
 
     # CallbackQueries need to be answered, even if no notification to the user is needed
-    # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
+    # Some clients may have trouble otherwise.
+    # See https://core.telegram.org/bots/api#callbackquery
     query.answer()
 
     query.edit_message_text(text="Selected option: {}".format(query.data))
@@ -104,7 +97,7 @@ def add_item(update, context):
     """Add item to the shopping list"""
     item_aded = update.message.text.replace("/add ", "").strip()
     ShoppingList.get_current_list().add_item(item_aded)
-    
+
     logger.info("%s added", item_aded)
 
 
