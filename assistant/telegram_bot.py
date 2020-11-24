@@ -9,9 +9,10 @@ Basic Echobot example, repeats messages.
 Press Ctrl-C on the command line or send a signal to the process to stop the
 bot.
 """
-
+import logging
+import functools
 import os
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'assistant.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "assistant.settings")
 
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
@@ -23,19 +24,12 @@ except ImportError as exc:
         "available on your PYTHONPATH environment variable? Did you "
         "forget to activate a virtual environment?"
     ) from exc
-
-from shoppinglist.models import Product, ShoppingList
 from django.utils import timezone
-import pathlib
-import logging
 from telegram_secrets import TOKEN, CHAT_ID
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-import functools
+from shoppinglist.models import ShoppingList
 
-CURRENT_DIR = pathlib.Path().absolute()
-SHOPPING_LIST = "/home/javier/src/python/assistant/shopping_list.txt"
-# Enable logging
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
@@ -45,17 +39,17 @@ logger = logging.getLogger(__name__)
 
 def is_home_chat(func):
     """Checks the message comes from our home's chat"""
+
     @functools.wraps(func)
     def wrapper_decorator(*args, **kwargs):
         if args[0].effective_chat.id != CHAT_ID:
             logger.info("Message from another chat: ")
             return None
         return func(*args, **kwargs)
+
     return wrapper_decorator
 
 
-# Define a few command handlers. These usually take the two arguments update and
-# context. Error handlers also receive the raised TelegramError object in error.
 @is_home_chat
 def start(update, context):
     """Send a message when the command /start is issued."""
@@ -65,14 +59,14 @@ def start(update, context):
 def test_inline(update, context):
     keyboard = [
         [
-            InlineKeyboardButton("Option 1", callback_data='1'),
-            InlineKeyboardButton("Option 2", callback_data='2'),
+            InlineKeyboardButton("Option 1", callback_data="1"),
+            InlineKeyboardButton("Option 2", callback_data="2"),
         ],
-        [InlineKeyboardButton("Option 3", callback_data='3')],
+        [InlineKeyboardButton("Option 3", callback_data="3")],
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text('Please choose:', reply_markup=reply_markup)
+    update.message.reply_text("Please choose:", reply_markup=reply_markup)
 
 
 def button(update: Update, context: CallbackContext) -> None:
@@ -83,6 +77,7 @@ def button(update: Update, context: CallbackContext) -> None:
     query.answer()
 
     query.edit_message_text(text="Selected option: {}".format(query.data))
+
 
 @is_home_chat
 def help_command(update, context):
@@ -98,61 +93,42 @@ def help_command(update, context):
 @is_home_chat
 def delete_item(update, context):
     """Delete item from the shopping list"""
-    if update.effective_chat.id != CHAT_ID:
-        logger.info("Message from another chat:")
-        return
-
     item_to_remove = update.message.text.replace("/rm", "").strip()
+    ShoppingList.get_current_list().delete_item(item_to_remove)
 
-    with open(SHOPPING_LIST, "r") as f:
-        lista = [item.strip() for item in f.read().splitlines()]
-        lista.remove(item_to_remove)
-
-    with open(SHOPPING_LIST, "w") as f:
-        for item in lista:
-            print(item, file=f, flush=True)
-
-    # update.message.reply_text("item deleted", quote=False)
+    logger.info("%s deleted", item_to_remove)
 
 
 @is_home_chat
 def add_item(update, context):
     """Add item to the shopping list"""
-    item_aded = update.message.text.replace("/add", "")
-    item = Product(name=item_aded,
-                   shopping_list=ShoppingList.get_current(),
-                   date_added=timezone.now())
-    item.save()
-    logger.info("item added")
+    item_aded = update.message.text.replace("/add ", "").strip()
+    ShoppingList.get_current_list().add_item(item_aded)
+    
+    logger.info("%s added", item_aded)
+
 
 @is_home_chat
 def get_list(update, context):
     """Get shopping list"""
-    with open(SHOPPING_LIST, "r") as f:
-        for item in f.read().splitlines():
-            if item != '':
-                update.message.reply_text(item, quote=False)
+    items_list = ShoppingList.get_current_list().list_items()
+    for item in items_list:
+        update.message.reply_text(item, quote=False)
+
+    logger.info("Current list requested")
+
 
 @is_home_chat
 def clear_list(update, context):
     """Clear shopping list"""
-    print(SHOPPING_LIST)
-    os.remove(SHOPPING_LIST)
-    with open(SHOPPING_LIST, "a") as _:
-        logger.info("List created")
+    ShoppingList.get_current_list().clear_list()
 
-
-# def echo(update, context):
-#     """Echo the user message."""
-#     update.message.reply_text(update.message.text)
+    logger.info("Current list emptied")
 
 
 def main():
     """Start the bot."""
-    # Create the Updater and pass it your bot's token.
-    # Make sure to set use_context=True to use the new context based callbacks
-    # Post version 12 this will no longer be necessary
-    updater = Updater(TOKEN, use_context=True)
+    updater = Updater(TOKEN)
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
@@ -167,10 +143,6 @@ def main():
     dp.add_handler(CommandHandler("test", test_inline))
     dp.add_handler(CallbackQueryHandler(button))
 
-    # on noncommand i.e message - echo the message on Telegram
-    # dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo))
-
-    # Start the Bot
     updater.start_polling()
 
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
