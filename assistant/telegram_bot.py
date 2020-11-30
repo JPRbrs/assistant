@@ -18,12 +18,18 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "assistant.settings")
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
 from telegram_secrets import TOKEN, CHAT_ID
-from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext
+from telegram.ext import (
+    Updater,
+    CommandHandler,
+    CallbackQueryHandler,
+    CallbackContext
+)
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from shoppinglist.models import ShoppingList
 
 logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.INFO
 )
 
 logger = logging.getLogger(__name__)
@@ -64,9 +70,10 @@ def test_inline(update, context):
 def button(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
 
-    # CallbackQueries need to be answered, even if no notification to the user is needed
-    # Some clients may have trouble otherwise.
-    # See https://core.telegram.org/bots/api#callbackquery
+    # CallbackQueries need to be answered, even if no notification
+    # to the user is needed
+    # Some clients may have trouble otherwise. See
+    # https://core.telegram.org/bots/api#callbackquery
     query.answer()
 
     query.edit_message_text(text="Selected option: {}".format(query.data))
