@@ -46,6 +46,10 @@ class ShoppingList(models.Model):
         for item in self.product_set.all():
             item.delete()
 
+    def mark_list_as_done(self):
+        self.date_bought = timezone.now()
+        self.current = False
+
 
 class Product(models.Model):
     """Product will represent a single item in the shopping_list."""

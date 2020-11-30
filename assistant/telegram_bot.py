@@ -126,6 +126,12 @@ def clear_list(update, context):
     logger.info("Current list emptied")
 
 
+@is_home_chat
+def mark_list_as_done(update, context):
+    """Mark shopping list as purchased"""
+    ShoppingList.get_current_list().mark_list_as_done()
+
+
 def main():
     """Start the bot."""
     updater = Updater(TOKEN)
