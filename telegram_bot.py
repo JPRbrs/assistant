@@ -25,7 +25,7 @@ from telegram.ext import (
     CallbackContext
 )
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from shoppinglist.models import ShoppingList
+from shoppinglist.models import ShoppingList, Product
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -91,21 +91,35 @@ def help_command(update, context):
 
 
 @is_home_chat
-def delete_item(update, context):
-    """Delete item from the shopping list"""
-    item_to_remove = update.message.text.replace("/rm", "").strip()
-    ShoppingList.get_current_list().delete_item(item_to_remove)
+def add_item(update, context):
+    """Add item to the shopping list"""
+    product_to_add = update.message.text.replace("/add ", "").strip()
+    current_shopping_list = ShoppingList.get_current_list()
+    try:
+        product = Product.objects.get(name=product_to_add)
+    except Product.DoesNotExist:
+        product = Product(name=product_to_add)
+        product.save()
+        product.shopping_list.add(current_shopping_list)
+    product.shopping_list.add(current_shopping_list)
 
-    logger.info("%s deleted", item_to_remove)
+    logger.info("%s added", product_to_add)
 
 
 @is_home_chat
-def add_item(update, context):
-    """Add item to the shopping list"""
-    item_aded = update.message.text.replace("/add ", "").strip()
-    ShoppingList.get_current_list().add_item(item_aded)
+def delete_item(update, context):
+    """Delete item from the shopping list"""
+    product_to_remove = update.message.text.replace("/rm", "").strip()
+    current_shopping_list = ShoppingList.get_current_list()
+    try:
+        product = Product.objects.get(name=product_to_remove)
+    except Product.DoesNotExist:
+        product = Product(name=product_to_remove)
+        product.save()
 
-    logger.info("%s added", item_aded)
+    product.shopping_list.only().delete()
+
+    logger.info("%s deleted", product_to_remove)
 
 
 @is_home_chat

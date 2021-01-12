@@ -16,6 +16,10 @@ class ShoppingList(models.Model):
         "date_bought", default=None, blank=True, null=True
     )
 
+    def __init__(self):
+        self.date_created = timezone.now()
+        self.current = False
+
     def __str__(self):
         return self.date_created.strftime("%d-%m-%y")
 
@@ -54,15 +58,11 @@ class ShoppingList(models.Model):
 class Product(models.Model):
     """Product will represent a single item in the shopping_list."""
 
-    shopping_list = models.ForeignKey(
-        ShoppingList,
-        on_delete=models.CASCADE,
-        default=None,
-        blank=True,
-        null=True
-    )
     name = models.CharField(max_length=30)
-    date_added = models.DateTimeField("date_added")
+    shopping_list = models.ManyToManyField(ShoppingList)
+
+    class Meta:
+        ordering = ["name"]
 
     def __str__(self):
         return self.name
