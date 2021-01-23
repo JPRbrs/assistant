@@ -17,6 +17,7 @@ class ShoppingList(models.Model):
     )
 
     def __init__(self):
+        super().__init__()
         self.date_created = timezone.now()
         self.current = False
 
@@ -66,3 +67,35 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Dish(models.Model):
+    """Dish will represent a lunch or dinner option"""
+
+    name = models.CharField(max_length=40)
+    # TODO: Restrict options to meat, fish, veg, pasta/rice
+    kind = models.CharField(max_length=30)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
+class Ingredient(models.Model):
+    """Ingredients will represent a single item in the Dish model."""
+
+    name = models.CharField(max_length=30)
+    dish = models.ManyToManyField(Dish)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+# >>> i.dish.all()
+# <QuerySet [<Dish: pasta>]>
+# >>> d.ingredient_set.all()
+# <QuerySet [<Ingredient: pasta>, <Ingredient: tomate>]>
