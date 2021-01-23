@@ -75,6 +75,7 @@ class Dish(models.Model):
     name = models.CharField(max_length=40)
     # TODO: Restrict options to meat, fish, veg, pasta/rice
     kind = models.CharField(max_length=30)
+    recipe = models.CharField(max_length=1000, default=None, blank=True, null=True)
 
     class Meta:
         ordering = ["name"]
