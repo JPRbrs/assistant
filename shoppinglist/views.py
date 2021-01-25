@@ -1,24 +1,27 @@
 from django.http import HttpResponse
+from django.shortcuts import render, get_object_or_404
+
 from .models import Dish
 
 
 def index(request):
-    """ This is a test """
-    return HttpResponse("Hello")
+    """ List of available dishes """
+    dishes = Dish.objects.all()
+    context = {
+        "dishes": dishes,
+    }
+    return render(request, "shoppinglist/index.html", context)
 
 
 def recipe(request, dish_id):
     """ Returns a dish with ingredients and recipe"""
 
-    dish = Dish.objects.filter(id=dish_id).first()
+    dish = get_object_or_404(Dish, pk=dish_id)
+    ingredients = dish.ingredient_set.all()
 
-    ingredients = ""
-    for ingredient in dish.ingredient_set.all():
-        ingredients += ingredient.name + ", "
+    context = {
+        'dish': dish,
+        'ingredients': ingredients
+    }
 
-    response = (
-        "Here is the recipe for {}, which has the following ingredients: {}".format(
-            dish.name, ingredients
-        )
-    )
-    return HttpResponse(response)
+    return render(request, 'shoppinglist/dish.html', context)

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Available dishes</title>
+  </head>
+  <body>
+    <ul>
+	{% if dishes %}
+	{% for dish in dishes %}
+        <li><a href="/shoppinglist/recipe/{{ dish.id }}/">{{ dish.name }}</a></li>
+    {% endfor %}
+    </ul>
+	{% else %}
+    <p>No dishes are available.</p>
+	{% endif %}
+  </body>
+</html>

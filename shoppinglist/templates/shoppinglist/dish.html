@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>{{ dish.name }}</title>
+  </head>
+  <body>
+    <p>This are the ingredients for {{ dish.name }}</p>
+    <ul>
+	{% if ingredients %}
+	{% for ingredient in ingredients %}
+        <li>{{ ingredient.name }}</li>
+    {% endfor %}
+    </ul>
+	{% else %}
+    <p>No ingredients are available.</p>
+	{% endif %}
+  </body>
+</html>
