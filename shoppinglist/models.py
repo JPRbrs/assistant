@@ -73,9 +73,14 @@ class Dish(models.Model):
     """Dish will represent a lunch or dinner option"""
 
     name = models.CharField(max_length=40)
-    # TODO: Restrict options to meat, fish, veg, pasta/rice
+    # TODO: Restrict options to meat, fish, veg, pasta, rice, pulses
     kind = models.CharField(max_length=30)
     recipe = models.CharField(max_length=1000, default=None, blank=True, null=True)
+    # 1 for lunch, 3 for dinner, 2 for both
+    time_of_day = models.IntegerField(default=False)
+    # Link to recipe online or locally (pictures and screenshots)
+    link = models.CharField(max_length=100, default=None, null=True)
+
 
     class Meta:
         ordering = ["name"]
@@ -88,6 +93,7 @@ class Ingredient(models.Model):
     """Ingredients will represent a single item in the Dish model."""
 
     name = models.CharField(max_length=30)
+    season = models.CharField(max_length=6, default=None, null=True)
     dish = models.ManyToManyField(Dish)
 
     class Meta:

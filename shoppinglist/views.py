@@ -1,5 +1,5 @@
-from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
+import random
 
 from .models import Dish
 
@@ -25,3 +25,21 @@ def recipe(request, dish_id):
     }
 
     return render(request, 'shoppinglist/dish.html', context)
+
+
+def menu(request):
+
+    days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    lunches = [lunch.name for lunch in Dish.objects.filter(time_of_day__lte=2).all()]
+    random.shuffle(lunches)
+    dinners = [dinner.name for dinner in Dish.objects.filter(time_of_day__gte=2).all()]
+    random.shuffle(dinners)
+
+    week = []
+    for i in range(6):
+        week.append({'day': days[i], 'lunch': lunches[i], 'dinner': dinners[i]})
+    context = {
+        'week': week
+    }
+    print(week)
+    return render(request, 'shoppinglist/weekly_menu.html', context)

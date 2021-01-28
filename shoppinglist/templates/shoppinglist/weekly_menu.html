@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Menu for the week</title>
+  </head>
+  <body>
+	 <body>
+       <table border = "1">
+		 {% for day in week %}
+        <tr>
+          <td>{{ day.day }}</td>
+		  <td>{{ day.lunch }}</td>		  
+		  <td>{{ day.dinner }}</td>		  
+        </tr>
+		{% endfor %}
+      </table>
+  </body>
+</html>
