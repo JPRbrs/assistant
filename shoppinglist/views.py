@@ -13,17 +13,6 @@ def index(request):
     return render(request, "shoppinglist/index.html", context)
 
 
-def dish(request, dish_id):
-    """ Returns a dish with ingredients and recipe"""
-
-    dish = get_object_or_404(Dish, pk=dish_id)
-    ingredients = dish.ingredient_set.all()
-
-    context = {"dish": dish, "ingredients": ingredients}
-
-    return render(request, "shoppinglist/dish.html", context)
-
-
 def menu(request):
     """ Get menu for the week """
     days = [
@@ -48,11 +37,28 @@ def menu(request):
     return render(request, "shoppinglist/weekly_menu.html", context)
 
 
+def dish(request, dish_id):
+    """ Returns a dish with ingredients and recipe"""
+
+    dish = get_object_or_404(Dish, pk=dish_id)
+    ingredients = dish.ingredient_set.all()
+
+    context = {"dish": dish, "ingredients": ingredients}
+
+    return render(request, "shoppinglist/dish.html", context)
+
+
 def new_dish(request):
     """ Store a new recipe """
     context = {
         "types": ["carbs", "meat", "fish", "veg"],
-        "time_of_day": ["lunch", "diner", "both"]
+        "time_of_day": ["lunch", "diner", "both"],
+        "name": "",
+        "link": "",
+        "recipe": "",
+        "type": "",
+        "selected_moment": "",
+        "selected_type": "",
     }
     return render(request, "shoppinglist/new_dish.html", context)
 
@@ -72,12 +78,29 @@ def save_dish(request):
         time_of_day=time_of_day_mapping[data['moment']],
     )
     dish.save()
-    return HttpResponse("Dish {} saved".format(data['dish_name']))
+    return HttpResponse(data)
 
 
-def test(request):
-    dish = get_object_or_404(Dish, pk=76)
-    ingredients = dish.ingredient_set.all()
+def delete_dish(request, dish_id):
+    Dish.objects.filter(pk=dish_id).delete()
+    return index(request)
 
-    context = {"dish": dish, "ingredients": ingredients}
-    return render(request, "shoppinglist/dish.html", context)
+
+def edit_dish(request, dish_id):
+    # TODO: it does not edit it creates a new one
+    dish = Dish.objects.filter(pk=dish_id).first()
+    time_of_day_mapping = {
+        1: "lunch",
+        2: "both",
+        3: "diner",
+    }
+    context = {
+        "types": ["carbs", "meat", "fish", "veg"],
+        "time_of_day": ["lunch", "diner", "both"],
+        "name": dish.name,
+        "link": dish.link,
+        "recipe": dish.recipe,
+        "selected_moment": time_of_day_mapping[dish.time_of_day],
+        "selected_type": dish.kind,
+    }
+    return render(request, "shoppinglist/new_dish.html", context)

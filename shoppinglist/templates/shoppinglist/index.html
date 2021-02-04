@@ -8,7 +8,7 @@
     <ul>
 	{% if dishes %}
 	{% for dish in dishes %}
-        <li><a href="/shoppinglist/dish/{{ dish.id }}/">{{ dish.name }}</a></li>
+        <li><a href="/shoppinglist/dish/{{ dish.id }}/">{{ dish.name }}</a>  <a href="/shoppinglist/dish/{{ dish.id }}/delete/">delete</a>  <a href="/shoppinglist/dish/{{ dish.id }}/edit/">edit</a></li>
     {% endfor %}
     </ul>
 	{% else %}

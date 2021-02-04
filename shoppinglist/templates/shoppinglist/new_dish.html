@@ -5,26 +5,31 @@
 <form action="{% url 'shoppinglist:save_dish' %}" method="post">
   {% csrf_token %}
   <p>Name
-	<input type="text" name="dish_name" id="dish_name">
+	<input type="text" name="dish_name" id="dish_name" value="{{ name }}"> 
   </p>
   <br>
-  {% for type in types %}
-  <input type="radio" name="type" id="{{ type }}" value="{{ type }}">
-  <label for="type">{{ type }}</label>
+
+  <label for="type_of_food">Choose a food type:</label>
+  <select name="type" id="type_of_food">
+	{% for type in types %}
+	<option value="{{ type }}" {% if type == selected_type %}selected {% endif %}}>{{ type }}</option>
+	{% endfor %}
+  </select>
   <br>
-  {% endfor %}
+
+  <label for="moment">Choose a moment in day:</label>
+  <select name="moment" id="moment">
+	{% for moment in time_of_day %}
+	<option value="{{ moment }}" {% if moment == selected_moment %}selected{% endif %} }>{{ moment }}</option>
+	{% endfor %}
+  </select>
   <br>
-  {% for moment in time_of_day %}
-  <input type="radio" name="moment" id="{{ moment }}" value="{{ moment }}">
-  <label for="type">{{ moment }}</label>
-  <br>
-  {% endfor %}
-  <br>
+  
    <p>Link to recipe
-	<input type="text" name="link_to_recipe" id="link_to_recipe">
+	<input type="text" name="link_to_recipe" id="link_to_recipe" value="{{ link }}">
    </p>
-     <p>Recipe
-	<input type="text" name="recipe" id="recipe">
+  <p>Recipe
+	<input type="text" name="recipe" id="recipe" value="{{ recipe }}">
   </p>
 
   <input type="submit" value="Save">
