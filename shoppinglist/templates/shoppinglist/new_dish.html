@@ -1,0 +1,32 @@
+<h1>New recipe</h1>
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form action="{% url 'shoppinglist:save_dish' %}" method="post">
+  {% csrf_token %}
+  <p>Name
+	<input type="text" name="dish_name" id="dish_name">
+  </p>
+  <br>
+  {% for type in types %}
+  <input type="radio" name="type" id="{{ type }}" value="{{ type }}">
+  <label for="type">{{ type }}</label>
+  <br>
+  {% endfor %}
+  <br>
+  {% for moment in time_of_day %}
+  <input type="radio" name="moment" id="{{ moment }}" value="{{ moment }}">
+  <label for="type">{{ moment }}</label>
+  <br>
+  {% endfor %}
+  <br>
+   <p>Link to recipe
+	<input type="text" name="link_to_recipe" id="link_to_recipe">
+   </p>
+     <p>Recipe
+	<input type="text" name="recipe" id="recipe">
+  </p>
+
+  <input type="submit" value="Save">
+</form>
+
